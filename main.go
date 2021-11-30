@@ -1,9 +1,9 @@
 package main
 
-func day1() {
-	println("Hello, world.")
-}
+import (
+	"advent2021/day01"
+)
 
 func main() {
-	day1()
+	day01.Day1()
 }
