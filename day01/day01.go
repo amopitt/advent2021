@@ -34,6 +34,7 @@ func Day1() {
 	println(sum)
 }
 
+// findThreeThatSum2020 finds the three numbers that sum to 2020 - brute force approach O(n^3)
 func findThreeThatSum2020(input []int) (int, int, int) {
 	for a, value := range input {
 		for b, value2 := range input {
