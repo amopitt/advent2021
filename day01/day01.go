@@ -14,7 +14,26 @@ func Day1() {
 	}
 	part1(input)
 	part2(input)
+}
 
+// part1 compares all the time the number increases across the input array
+func part1(input []int) {
+	start := 0
+	compare := 1
+	numIncreased := 0
+	for {
+		if compare >= len(input) {
+			break
+		}
+
+		if input[compare] > input[start] {
+			numIncreased++
+		}
+
+		start++
+		compare++
+	}
+	fmt.Println(numIncreased)
 }
 
 /*
@@ -28,6 +47,7 @@ func Day1() {
 269    F G H
 260      G H
 263        H
+Compare the sum of 3 values to the next set of 3 values to see if it is increasing.
 */
 func part2(input []int) {
 	start := 0
@@ -50,29 +70,12 @@ func part2(input []int) {
 	}
 	fmt.Println(numIncreased)
 }
+
+// getSum returns the sum of the values in the slice
 func getSum(input []int, start int, num int) int {
 	sum := 0
 	for i := 0; i < num; i++ {
 		sum += input[start+i]
 	}
 	return sum
-}
-
-func part1(input []int) {
-	start := 0
-	compare := 1
-	numIncreased := 0
-	for {
-		if compare >= len(input) {
-			break
-		}
-
-		if input[compare] > input[start] {
-			numIncreased++
-		}
-
-		start++
-		compare++
-	}
-	fmt.Println(numIncreased)
 }
