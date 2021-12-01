@@ -12,38 +12,67 @@ func Day1() {
 		fmt.Println(err)
 		return
 	}
+	part1(input)
+	part2(input)
 
-	a, b, c := findThreeThatSum2020(input)
-	fmt.Println(a * b * c)
-
-	// convert input to a hash map
-	inputMap := make(map[int]int)
-	for _, value := range input {
-		inputMap[value] = value
-	}
-
-	// iterate through input
-	var sum int
-	for _, value := range input {
-		missingValue := 2020 - value
-		if _, ok := inputMap[missingValue]; ok {
-			sum = value * missingValue
-			break
-		}
-	}
-	println(sum)
 }
 
-// findThreeThatSum2020 finds the three numbers that sum to 2020 - brute force approach O(n^3)
-func findThreeThatSum2020(input []int) (int, int, int) {
-	for a, value := range input {
-		for b, value2 := range input {
-			for c, value3 := range input {
-				if a != b && b != c && value+value2+value3 == 2020 {
-					return value, value2, value3
-				}
-			}
+/*
+199  A
+200  A B
+208  A B C
+210    B C D
+200  E   C D
+207  E F   D
+240  E F G
+269    F G H
+260      G H
+263        H
+*/
+func part2(input []int) {
+	start := 0
+	compare := 1
+	// compare 0 - 2 to 1 - 3
+	// compare 1 - 3 to 2 - 4
+	// compare 2 - 4 to 3 - 5
+	numIncreased := 0
+	for {
+		// at the end here
+		if compare+2 >= len(input) {
+			break
 		}
+
+		if getSum(input, compare, 3) > getSum(input, start, 3) {
+			numIncreased++
+		}
+		start++
+		compare++
 	}
-	return 0, 0, 0
+	fmt.Println(numIncreased)
+}
+func getSum(input []int, start int, num int) int {
+	sum := 0
+	for i := 0; i < num; i++ {
+		sum += input[start+i]
+	}
+	return sum
+}
+
+func part1(input []int) {
+	start := 0
+	compare := 1
+	numIncreased := 0
+	for {
+		if compare >= len(input) {
+			break
+		}
+
+		if input[compare] > input[start] {
+			numIncreased++
+		}
+
+		start++
+		compare++
+	}
+	fmt.Println(numIncreased)
 }
