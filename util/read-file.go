@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // ReadFile reads a file and returns a slice of strings
@@ -30,6 +31,18 @@ func ReadFileInts(fileName string) ([]int, error) {
 	}
 	var ints []int
 	for _, line := range lines {
+		i, err := strconv.Atoi(line)
+		if err != nil {
+			return nil, err
+		}
+		ints = append(ints, i)
+	}
+	return ints, nil
+}
+
+func SplitIntoInts(s string) ([]int, error) {
+	var ints []int
+	for _, line := range strings.Split(s, "\n") {
 		i, err := strconv.Atoi(line)
 		if err != nil {
 			return nil, err
