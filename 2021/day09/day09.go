@@ -10,24 +10,8 @@ import (
 )
 
 /*
-	  0:      1:      2:      3:      4:
-	aaaa    ....    aaaa    aaaa    ....
-	b    c  .    c  .    c  .    c  b    c
-	b    c  .    c  .    c  .    c  b    c
-	....    ....    dddd    dddd    dddd
-	e    f  .    f  e    .  .    f  .    f
-	e    f  .    f  e    .  .    f  .    f
-	gggg    ....    gggg    gggg    ....
 
-	5:      6:      7:      8:      9:
-	aaaa    aaaa    aaaa    aaaa    aaaa
-	b    .  b    .  .    c  b    c  b    c
-	b    .  b    .  .    c  b    c  b    c
-	dddd    dddd    ....    dddd    dddd
-	.    f  e    f  .    f  e    f  .    f
-	.    f  e    f  .    f  e    f  .    f
-	gggg    gggg    ....    gggg    gggg
-*/
+ */
 func main() {
 	fmt.Println("Day 9, Hello.")
 
@@ -38,124 +22,123 @@ func main() {
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 
-	numberMap := make(map[int]string)
-	numberMap[0] = "abcefg"  // len 6, matches 4 = 3, matches 1 = 2
-	numberMap[1] = "cf"      // len 2
-	numberMap[2] = "acdeg"   // len 5, matches 4 = 2, matches 1 = 1
-	numberMap[3] = "acdfg"   // len 5, matches 4 = 3, matches 1 = 2
-	numberMap[4] = "bcdf"    // len 4
-	numberMap[5] = "abdfg"   // len 5, matches 4 = 3, matches 1 = 1
-	numberMap[6] = "abdefg"  // len 6, matches 4 = 3, matches 1 = 1
-	numberMap[7] = "acf"     // len 3
-	numberMap[8] = "abcdefg" // len 7
-	numberMap[9] = "abcdfg"  // len 6, matches 4 = 4, matches 1 = 2
+	numbers := make([][]int, 0)
 
-	sum := 0
 	for scanner.Scan() {
 		value := scanner.Text()
-		kv := strings.Split(value, " | ")
-		input := kv[0]
-		output := kv[1]
-		inputEntries := strings.Split(input, " ")
-		finalEntries := strings.Split(output, " ")
+		intStr := strings.Split(value, "")
+		rowNumbers := make([]int, 0)
 
-		// loop over inputEntries
-		for _, v := range inputEntries {
-			numberMap[len(v)] = v
-		}
-		d := ""
-		for _, v := range finalEntries {
-			len := len(v)
-			match4 := getMatchCount(v, numberMap[4])
-			match1 := getMatchCount(v, numberMap[2])
-			switch {
-			// unique values where length directly maps to a number
-			case len == 2:
-				d += "1"
-			case len == 3:
-				d += "7"
-			case len == 4:
-				d += "4"
-			case len == 7:
-				d += "8"
-			// for these two cases, check the number of chars that match the 4th and 1st numbers
-			case len == 5:
-				if match4 == 2 {
-					d += "2"
-				} else {
-					if match1 == 1 {
-						d += "5"
-					} else {
-						d += "3"
-					}
-				}
-			case len == 6:
-				if match4 == 4 {
-					d += "9"
-				} else {
-					if match1 == 1 {
-						d += "6"
-					} else {
-						d += "0"
-					}
-				}
-
+		for _, v := range intStr {
+			number, err := strconv.Atoi(v)
+			if err != nil {
+				panic(err)
 			}
+			rowNumbers = append(rowNumbers, number)
 		}
+		numbers = append(numbers, rowNumbers)
 
-		fmt.Println("iteration sum", d)
-		intValue, _ := strconv.Atoi(d)
-		sum += intValue
 	} // end for scanner.Scan()
-	fmt.Println("total", sum)
+
+	lowPoints, basinCounts := part1(numbers)
+
+	// sort basinCounts
+	sort.Ints(basinCounts)
+
+	fmt.Println(lowPoints)
+	fmt.Println(basinCounts)
+	fmt.Println(basinCounts[len(basinCounts)-1] * basinCounts[len(basinCounts)-2] * basinCounts[len(basinCounts)-3])
 }
 
-func getMatchCount(s string, s2 string) int {
-	arrS1 := strings.Split(s, "")
+func part1(numbers [][]int) (int, []int) {
+	var lowPoints int
+	basinCounts := make([]int, 0)
+	for i := 0; i < len(numbers); i++ {
+		for j := 0; j < len(numbers[i]); j++ {
 
-	// loop over arrS1
-	count := 0
-	for _, v := range arrS1 {
-		if strings.Contains(s2, v) {
+			leftOf := 10
+			rightOf := 10
+			above := 10
+			below := 10
+
+			numberToCheck := numbers[i][j]
+
+			// check if surrounding numbers are higher than numberToCheck
+			if j-1 >= 0 {
+				leftOf = numbers[i][j-1]
+			}
+			if j+1 < len(numbers[i]) {
+				rightOf = numbers[i][j+1]
+			}
+			if i-1 >= 0 {
+				above = numbers[i-1][j]
+			}
+			if i+1 < len(numbers) {
+				below = numbers[i+1][j]
+			}
+			if numberToCheck < leftOf && numberToCheck < rightOf && numberToCheck < above && numberToCheck < below {
+				fmt.Println("found a low point:", numberToCheck)
+
+				count := getBasinCount(1, numbers, i, j, numberToCheck)
+				fmt.Println("basin count:", count)
+				basinCounts = append(basinCounts, count+1)
+				lowPoints += (numberToCheck + 1)
+			}
+			//	fmt.Println(i, j, numberToCheck, leftOf, rightOf, above, below)
+
+		}
+	}
+	return lowPoints, basinCounts
+}
+
+//step 2: check if left, right, above, below are higher than n
+// - if any are higher and not equal to 9, add it to the basin
+// repeat step 1
+// 2199943210
+// 3987894921
+// 9856789892
+// 8767896789
+// 9899965678
+func getBasinCount(sum int, numbers [][]int, i int, j int, numberToCheck int) (count int) {
+	// check if surrounding numbers are higher than numberToCheck
+
+	if j-1 >= 0 {
+		leftOf := numbers[i][j-1]
+		if leftOf > numberToCheck && leftOf != 9 && leftOf != -1 {
 			count++
+			numbers[i][j-1] = -1
+			count += getBasinCount(sum, numbers, i, j-1, leftOf)
 		}
 	}
+
+	if j+1 < len(numbers[i]) {
+		rightOf := numbers[i][j+1]
+		if rightOf > numberToCheck && rightOf != 9 && rightOf != -1 {
+			count++
+			numbers[i][j+1] = -1
+			count += getBasinCount(sum, numbers, i, j+1, rightOf)
+		}
+	}
+
+	if i-1 >= 0 {
+		above := numbers[i-1][j]
+		if above > numberToCheck && above != 9 && above != -1 {
+			count++
+			numbers[i-1][j] = -1
+			count += getBasinCount(sum, numbers, i-1, j, above)
+		}
+	}
+
+	if i+1 < len(numbers) {
+		below := numbers[i+1][j]
+		if below > numberToCheck && below != 9 && below != -1 {
+			count++
+			numbers[i+1][j] = -1
+			count += getBasinCount(sum, numbers, i+1, j, below)
+		}
+	}
+
+	fmt.Println("in method count for", numberToCheck, count)
 	return count
-}
 
-// ended up not using these after dealing with part 2 but leaving them for utils later maybe
-
-func getUniqueChar(s1, s2 string) string {
-	arrS1 := strings.Split(s1, "")
-	arrS2 := strings.Split(s2, "")
-	var foundChar string
-	for _, s := range arrS2 {
-		if !contains(arrS1, s) {
-			foundChar += s
-		}
-	}
-	return foundChar
-}
-
-func contains(arr []string, s string) bool {
-	for _, v := range arr {
-		if v == s {
-			return true
-		}
-	}
-	return false
-}
-
-func sortArrayByLength(arr []string) {
-	sort.Slice(arr, func(i, j int) bool {
-		return len(arr[i]) < len(arr[j])
-	})
-}
-
-func isUnique(s string) bool {
-	strLength := len(s)
-	if strLength == 2 || strLength == 4 || strLength == 3 || strLength == 7 {
-		return true
-	}
-	return false
 }
