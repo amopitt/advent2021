@@ -9,7 +9,7 @@ import (
 func main() {
 	fmt.Println("Day 11, Hello.")
 
-	file, err := os.Open("input.txt")
+	file, err := os.Open("sample.txt")
 	if err != nil {
 		panic(err)
 	}
