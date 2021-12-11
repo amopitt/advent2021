@@ -51,8 +51,8 @@ func main() {
 		p = append(p, pw)
 	}
 	fmt.Println(p)
-	fmt.Println(part1(p))
-	//fmt.Println(part2(input))
+	//fmt.Println(part1(p))
+	fmt.Println(part2(p))
 }
 
 func part1(p []PasswordMatch) int {
@@ -64,6 +64,25 @@ func part1(p []PasswordMatch) int {
 
 		// if the count is less than the min or greater than the max, then the password doesn't match
 		if count >= v.min && count <= v.max {
+			validPasswords++
+		}
+	}
+	return validPasswords
+}
+
+func part2(p []PasswordMatch) int {
+	var validPasswords int
+	for _, v := range p {
+		matches := 0
+		vals := strings.Split(v.password, "")
+		if vals[v.min-1] == v.key {
+			matches++
+		}
+		if vals[v.max-1] == v.key {
+			matches++
+		}
+
+		if matches == 1 {
 			validPasswords++
 		}
 	}
